@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live QR Code</title>
+    <style>
+        img {
+            width: 250px;
+            height: 250px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>✅ الكود بيتجدد تلقائيًا كل دقيقة لمدة 15 دقيقة</h2>
+    <div id="timer">متبقي: 15:00</div>
+    <img id="qr-img" src="" alt="جاري تحميل الكود...">
+
+    <script>
+        let timeLeft = 15 * 60; // 15 دقيقة
+        const courseId = "{{ course_id }}";
+        const qrImg = document.getElementById('qr-img');
+        const timerTag = document.getElementById('timer');
+
+        function updateTimerDisplay() {
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            timerTag.innerText = `⏳ متبقي: ${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function fetchQR() {
+            fetch(`/attendance/generate_qr/ajax/${courseId}/`)
+                .then(res => res.json())
+                .then(data => {
+                    qrImg.src = data.image_url + '?v=' + new Date().getTime();
+                });
+        }
+
+        fetchQR(); // أول مرة
+        updateTimerDisplay();
+
+        // كل دقيقة: بس نجيب كود جديد (من غير ما نخصم وقت)
+        const qrInterval = setInterval(() => {
+            fetchQR();
+        }, 60000);
+
+        // عداد الوقت كل ثانية
+        const timerInterval = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(qrInterval);
+                clearInterval(timerInterval);
+                timerTag.innerText = "✅ انتهى الوقت";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
+
+<!-- http://127.0.0.1:8000/attendance/generate_qr/live/1/ -->

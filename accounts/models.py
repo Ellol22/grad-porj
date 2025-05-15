@@ -8,7 +8,17 @@ class Student(models.Model):
     name = models.CharField(max_length=50)
     mobile = models.CharField(max_length=11, unique=True)
     national_id = models.CharField(max_length=14, unique=True)
-    structure = models.ForeignKey(StudentStructure, on_delete=models.SET_NULL, null=True, blank=True)
+    structure = models.ForeignKey(StudentStructure, on_delete=models.SET_NULL, null=True, blank=True) # ودا كمان محتاج فيوز
+
+    def get_my_courses(self):
+        from courses.models import Course
+        if self.structure:
+            return Course.objects.filter(
+                department=self.structure.department,
+                academic_year=self.structure.year,
+                semester=self.structure.semester
+            )
+        return Course.objects.none()  # المفروض نظبطها ف فايل الفيوز
 
     def __str__(self):
         return self.name
@@ -19,7 +29,11 @@ class Doctor(models.Model):
     name = models.CharField(max_length=50)
     mobile = models.CharField(max_length=11, unique=True)
     national_id = models.CharField(max_length=14, unique=True)
-    structure = models.ManyToManyField('structure.StudentStructure', blank=True)
+    structure = models.ManyToManyField('structure.StudentStructure', blank=True) # ودة كمان
+
+    def get_my_courses(self):
+        from courses.models import Course
+        return Course.objects.filter(doctor=self) # وده كماننن
 
     def __str__(self):
         return self.name

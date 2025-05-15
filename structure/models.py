@@ -12,15 +12,15 @@ class DepartmentChoices(models.TextChoices):
 
 # الفرق الدراسية
 class AcademicYearChoices(models.TextChoices):
-    FIRST = 'First', 'الفرقة الأولى'
-    SECOND = 'Second', 'الفرقة الثانية'
-    THIRD = 'Third', 'الفرقة الثالثة'
-    FOURTH = 'Fourth', 'الفرقة الرابعة'
+    FIRST = 'First', 'First Year'
+    SECOND = 'Second', 'Second Year'
+    THIRD = 'Third', 'Third Year'
+    FOURTH = 'Fourth', 'Fourth Year'
 
 # الترم
 class SemesterChoices(models.TextChoices):
-    FIRST = 'First', 'الترم الأول'
-    SECOND = 'Second', 'الترم الثاني'
+    FIRST = 'First', 'First Semester'
+    SECOND = 'Second', 'Second Semester'
 
 # موديل يربطهم (لو حبيت تخزنهم مع بعض)
 class StudentStructure(models.Model):

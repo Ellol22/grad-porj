@@ -29,13 +29,13 @@ def validate_email_format(email):
 @api_view(['POST'])
 def api_sign_up(request):
     data = request.data
-    username = data.get('username')
-    password = data.get('password')
-    user_type = data.get('user_type')
-    national_id = data.get('national_id')
-    email = data.get('email')
-    mobile = data.get('mobile')
-    name = data.get('name') 
+    username = data.get('username') ####
+    password = data.get('password') ###
+    user_type = data.get('user_type') ####
+    national_id = data.get('national_id') ###
+    email = data.get('email') ###
+    mobile = data.get('mobile') ###
+    name = data.get('name') ###
 
     # التحقق من صحة الإيميل
     if not validate_email_format(email):
@@ -60,7 +60,7 @@ def api_sign_up(request):
 
 
             user = User.objects.create_user(username=username, password=password, email=email, first_name=name)
-            user.is_active = False  # بنقوله انت مش مفعل لسة
+            user.is_active = False
             user.save()
             student.user = user
             student.mobile = mobile
@@ -68,7 +68,7 @@ def api_sign_up(request):
 
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            activation_link = f"{settings.SITE_DOMAIN}/api/activate/{uid}/{token}/"
+            activation_link = f"{settings.SITE_DOMAIN}api/activate/{uid}/{token}/"
             # إرسال الإيميل
             send_mail(
                 subject="activate your account ✉️",

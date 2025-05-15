@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تأكيد الحضور</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        #preview { width: 300px; margin: 20px auto; display: none; border: 2px solid #ccc; }
+        #qr-status, #location-status { margin-top: 10px; font-weight: bold; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <h2>📌 تأكيد الحضور</h2>
+
+    <button id="qr-btn">1️⃣ اسكان QR Code</button>
+    <div id="preview"></div>
+    <div id="qr-status"></div>
+
+    <button id="location-btn" style="display:none;">2️⃣ تأكيد الموقع الجغرافي</button>
+    <div id="location-status"></div>
+
+    <script>
+        const qrBtn = document.getElementById("qr-btn");
+        const previewElement = document.getElementById("preview");
+        const qrStatus = document.getElementById("qr-status");
+        const locationBtn = document.getElementById("location-btn");
+        const locationStatus = document.getElementById("location-status");
+
+        let scannedCode = null;
+
+        qrBtn.addEventListener("click", () => {
+            previewElement.style.display = "block";
+            const html5QrCode = new Html5Qrcode("preview");
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText, decodedResult) => {
+                    html5QrCode.stop().then(() => {
+                        previewElement.innerHTML = "";
+                        previewElement.style.display = "none";
+                        scannedCode = decodedText;
+
+                        // ✅ التعديل هنا باستخدام backticks `${}`
+                        fetch(`/attendance/verify_qr/?qr_code_data=${encodeURIComponent(scannedCode)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                qrStatus.innerHTML = (data.status === 'success')
+                                    ? "✅ الكود صحيح: " + data.message
+                                    : "❌ خطأ: " + data.message;
+
+                                if (data.status === 'success') {
+                                    locationBtn.style.display = "inline";
+                                }
+                            });
+                    });
+                },
+                (errorMessage) => {
+                    console.warn("خطأ في قراءة الكود:", errorMessage);
+                }
+            ).catch(err => {
+                console.error("فشل فتح الكاميرا:", err);
+            });
+        });
+
+        locationBtn.addEventListener("click", () => {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        fetch("/attendance/verify_location/", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": getCookie("csrftoken")
+                            },
+                            body: JSON.stringify({ latitude: lat, longitude: lon })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            locationStatus.innerHTML = (data.status === 'success')
+                                ? "✅ الموقع صحيح: " + data.message
+                                : "❌ " + data.message;
+                        });
+                    },
+                    (error) => {
+                        locationStatus.innerHTML = "❌ فشل في جلب الموقع: " + error.message;
+                    }
+                );
+            } else {
+                locationStatus.innerHTML = "❌ جهازك لا يدعم الموقع الجغرافي";
+            }
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+
+</body>
+</html>

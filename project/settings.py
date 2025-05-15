@@ -27,17 +27,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-xbkcn(qu25(l1sqwtrby#gbgkp=2$+esxpi**rdq!+els)sxpg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
+CORS_ALLOW_ALL_ORIGINS = True
 
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://1d0b-196-136-86-162.ngrok-free.app'  # الـ URL بتاع ngrok
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://5d27-41-37-69-52.ngrok-free.app'  # الـ URL بتاع ngrok
+# ]
 
-SITE_DOMAIN = "https://1d0b-196-136-86-162.ngrok-free.app"
+SITE_DOMAIN = "http://192.168.167.182:8000/"
+CSRF_COOKIE_NAME = 'csrftoken'
+
 
 
 
@@ -45,8 +48,9 @@ SITE_DOMAIN = "https://1d0b-196-136-86-162.ngrok-free.app"
 # Application definition
 
 INSTALLED_APPS = [
-    "rest_framework",
     'corsheaders',
+    "rest_framework",
+    'chatbot',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,9 +65,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,7 +80,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],  
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -147,7 +151,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # لو عندك مجلد static محلي، بس مش ضروري هنا
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
